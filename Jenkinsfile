@@ -1,13 +1,12 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = "minn01/ead-mern-todo-app:latest"
-    }
-
     stages {
 
         stage('Build') {
+            agent {
+                docker { image 'node:22-alpine' }
+            }
             steps {
                 sh '''
                 cd TODO/todo_backend
@@ -21,9 +20,7 @@ pipeline {
 
         stage('Containerise') {
             steps {
-                sh '''
-                docker build -t $IMAGE_NAME .
-                '''
+                sh 'docker build -t minn01/finead-todo-app:latest .'
             }
         }
 
@@ -36,7 +33,7 @@ pipeline {
                 )]) {
                     sh '''
                     echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                    docker push $IMAGE_NAME
+                    docker push minn01/finead-todo-app:latest
                     '''
                 }
             }
@@ -44,7 +41,7 @@ pipeline {
 
         stage('Complete') {
             steps {
-                echo 'Pipeline finished successfully'
+                echo "Pipeline completed successfully"
             }
         }
     }
